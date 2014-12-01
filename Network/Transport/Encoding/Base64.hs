@@ -1,3 +1,16 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      : Network.Transport.Encoding.Base64
+-- Copyright   : (c) Moritz Angermann 2014
+-- License     : MIT
+--
+-- Maintainer  : moritz@lichtzwerge.de
+-- Stability   : stable
+-- Portability : portable
+--
+-- A trivial service that uses base64 as encoding for the
+-- messages and newlines for message separation.
+--------------------------------------------------------------------------------
 module Network.Transport.Encoding.Base64 (mkService) where
 import           Network.Socket          (Socket, SockAddr, socketToHandle)
 import           System.IO               (hSetBuffering, hGetContents, hPutStrLn, hClose
@@ -13,7 +26,12 @@ import           Network.Service
 decode' :: ByteString -> ByteString
 decode' bs = let Right res = decode bs in res
 
-mkService :: ServiceMessage a => (Socket, SockAddr) -> IO (Service a)
+-- | Builds a simple service, that uses base64 as the base
+--   encoding for the messages.  Messages are separated by
+--   newlines.
+mkService :: ServiceMessage a
+             => (Socket, SockAddr) -- ^ The socket and socket address to the service is bound on.
+             -> IO (Service a)     -- ^ The service to be used.
 mkService (sock, addr) = do
   hdl <- socketToHandle sock ReadWriteMode
   hSetBuffering hdl LineBuffering

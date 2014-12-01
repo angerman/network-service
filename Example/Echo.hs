@@ -1,4 +1,26 @@
 {-# LANGUAGE Rank2Types #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      : Example.Echo
+-- Copyright   : (c) Moritz Angermann 2014
+-- License     : MIT
+--
+-- Maintainer  : moritz@lichtzwerge.de
+-- Stability   : stable
+-- Portability : portable
+--
+-- An echo service on port 2000
+--
+-- To start the server run
+-- > $ echo server
+--
+-- You can then run the client
+-- > $ echo client
+--
+-- Or connect to the server with telnet
+-- > $ telnet localhost 2000
+--
+--------------------------------------------------------------------------------
 module Main (main) where
 import           Network.Simple.TCP
 import           Data.ByteString.Char8   ( pack, unpack )
@@ -8,16 +30,28 @@ import           Control.Monad           ( unless )
 import Network.Service
 import Network.Transport.Encoding.Base64 (mkService)
 
-mkServiceServer :: ServiceMessage a => ServiceName -> ServiceHandler a -> IO ()
+-- | Make a service server running on the executing host.
+mkServiceServer :: ServiceMessage a
+                   => ServiceName      -- ^ the port
+                   -> ServiceHandler a -- ^ a handler to handle connections.
+                   -> IO ()
 mkServiceServer port shandler = serve HostAny port handler
   where handler :: (Socket, SockAddr) -> IO ()
         handler x = mkService x >>= shandler
 
-mkServiceClient :: ServiceMessage a => HostName -> ServiceName -> IO (Service a)
+-- | Make a service client
+mkServiceClient :: ServiceMessage a
+                   => HostName       -- ^ The hostname that provides a 'Service a'.
+                   -> ServiceName    -- ^ The port the service runs at.
+                   -> IO (Service a) -- ^ The client. (Service interface)
 mkServiceClient h p = connect h p mkService
 
+-- | We use a simple data type for communication.
+--   All it holds is a simple string.
 data Message = Msg String
 
+-- | Turning a String message into a bytestring.
+--   Trivially through pack and unpack.
 instance ServiceMessage Message where
   toBS (Msg s) = pack s
   fromBS = Msg . unpack
