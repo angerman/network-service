@@ -26,6 +26,10 @@ flag example
 flag documentation
   default: False
 
+source-repository head
+  type:     git
+  location: https://github.com/angerman/network-service.git
+
 library
   if flag(documentation)
      build-depends:    hscolour
